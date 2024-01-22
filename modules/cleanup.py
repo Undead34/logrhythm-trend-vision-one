@@ -40,7 +40,7 @@ def cleanup():
         except Exception as e:
             console.error(f"Error al leer el archivo {file} Type: {type(e)}: {e}")
 
-    console.debug(f"{file_count} files moved.")
+    console.debug(f"{file_count} files removed.")
 
 # Getting Agent state location from registry.
 def get_agent_state():
