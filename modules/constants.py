@@ -20,6 +20,7 @@ config = {
     "api": {
         "token": os.environ.get("API_TOKEN"),
         "expiration": os.environ.get("EXPIRATION_DATE_TOKEN"),
+        "region": os.environ.get("REGION"),
     },
     "email": {
         "report": os.environ.get("EMAIL_REPORT"),
@@ -32,7 +33,6 @@ config = {
         "max_files": int(os.environ.get("MAX_NUM_FILES")),  
     },
     "log_source_id": os.environ.get("LOG_SOURCE_ID"),
-    "region": os.environ.get("REGION"),
 }
 
 base_path = path.realpath(path.join(path.curdir, "logs"))

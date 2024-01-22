@@ -1,33 +1,25 @@
-from os import path
-import winreg
-import shutil
-import os
-
 from datetime import datetime, timezone, timedelta
 import requests
 
 from .loggers import TrendMicroLogger, console
-from .errors import AgentError
 from .constants import config
-from .utils import parse_OAT
+from .utils import parse_OAT, getRegion
 
 class TrendVisionOne:
     def __init__(self):
         self.logger = TrendMicroLogger()
+        self._getOATLogs()
 
-    def run(self):
-        self._get_OAT()
-
-    def _get_OAT(self):
+    def _getOATLogs(self):
         console.debug("Comenzando la obtención de OAT...")
-        url_base = "https://api.xdr.trendmicro.com"
+        url_base = getRegion(config["api"]["region"])
         url_path = "/v3.0/oat/detections"
         token = config["api"]["token"]
 
         query_params = {
-            "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "detectedEndDateTime": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "top": 200,
+            "top": 100,
         }
 
         headers = {
@@ -45,13 +37,12 @@ class TrendVisionOne:
         if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
             output = r.json()
             console.debug(output.get("totalCount"))
-            self._save_OAT(parse_OAT(output))
+            logs = parse_OAT(output)
+            console.debug("Saving OAT detections...")
+
+            for log in logs:
+                self.logger.oat(log)
         else:
             console.debug(r.text)
-
+        
         console.debug("Tarea completada.")
-
-    def _save_OAT(self, OATs: list[str]):
-        console.debug("Saving OAT detections...")
-        for OAT in OATs:
-            self.logger.log(OAT)
