@@ -1,7 +1,6 @@
 from .schemes.detections import DetectionsSchema
 from .schemes.endpointActivityData import EndpointActivityData
 
-
 def sizeTextToNum(size: str):
     """Converts a size string to a number of bytes
     Args:

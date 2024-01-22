@@ -4,19 +4,16 @@
 import sys
 from datetime import datetime, timezone
 
-from modules.constants import config
 from modules.errors import TokenExpiredError, TokenNotSetError
-from modules.loggers import Console
-from modules.setup import isfirstStart, setup
-from modules.tests import test
 from modules.trend_vision_one import TrendVisionOne
 
-console = Console()
+from modules.setup import isfirstStart, setup
+from modules.constants import config
+from modules.loggers import Console
+from modules.tests import test
+from modules.cleanup import cleanup
 
-def run():
-    console.debug("Iniciando Trend Vision One...")
-    trend_vision_one = TrendVisionOne()
-    trend_vision_one.run()
+console = Console()
 
 def bootstrap():
     # Check if API_TOKEN is set
@@ -44,16 +41,25 @@ def bootstrap():
           console.warn("Advertencia: No se ha establecido una fecha de expiración para el token de Trend Vision One.")
           console.warn("Si no establece una fecha de expiración, el sistema no podrá notificarle cuando el token expire.")
     
-    if isfirstStart(): setup(); run()
+    if isfirstStart():
+        setup()
     else:
-        if test():
-            console.debug("Trend Vision One está listo para funcionar.")
-            run()
-        else:
+        if not test():
             raise Exception("No se ha podido iniciar Trend Vision One. Los tests han fallado.")
+
+    console.debug("Trend Vision One está listo para funcionar.")
+    trend_vision_one = TrendVisionOne()
+    trend_vision_one.run()
 
 if __name__ == "__main__":
     try:
+        # Check if have argument --clean
+        if len(sys.argv) > 1 and sys.argv[1] == "--clean" or "--clean" in sys.argv:
+            console.debug("Comenzando la limpieza...")
+            cleanup()
+            console.debug("Limpieza completada.")
+            sys.exit(0)
+        
         bootstrap()
     except Exception as e:
         console.error(e)
