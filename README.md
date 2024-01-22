@@ -3,6 +3,7 @@
 Esta herramienta te ayuda a configurar LogRhythm con Trend Vision One a través de `Flat File`.
 
 ## Comenzando
+Actualmente esta herramienta solo funciona en Windows o bueno... no ha sido probada en Linux si logras hacerla funcionar en Linux recuerda enviar tu PR. Se un buen ser humano y respeta la licencia que es GPL :D
 
 Para empezar a utilizar esta herramienta debes clonar este repositorio y colocarlo en donde quieras en tu servidor SIEM. El lugar donde lo coloques debe tener suficiente espacio para poder guardar logs. Recomendamos mínimo 5 GB. Aunque esta herramienta tiene un sistema de limpieza automático, es bueno tener espacio adicional.
 
@@ -62,7 +63,7 @@ Crear el entorno virtual:
     python -m vevn .venv
 Activar el entorno virtual
 
-    .\\.venv\\Scripts\\activate
+    .\.venv\Scripts\activate
 Instalar las dependencias de Python
 
     pip install -r requirements.txt
