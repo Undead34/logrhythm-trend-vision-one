@@ -1,5 +1,4 @@
 import winreg
-import shutil
 import os
 
 from .errors import AgentError
@@ -52,7 +51,6 @@ def get_agent_state():
         agent_state, _ = winreg.QueryValueEx(key, "STATEPATH")
         return agent_state
     except FileNotFoundError:
-        return "X:\\LogRhythm\\LogRhythm System Monitor\\state\\"
         raise AgentError(
             "No se pudo encontrar la ubicación del estado del agente. "
             "Por favor, asegúrese de que el agente esté instalado."
