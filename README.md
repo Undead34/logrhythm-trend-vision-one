@@ -1,16 +1,16 @@
 # LogRhythm Flat File Trend Vision One
 
-Esta herramienta permite te ayuda a confurar LogRhythm con Trend Vision One a través de `Flat File`.
+Esta herramienta te ayuda a configurar LogRhythm con Trend Vision One a través de `Flat File`.
 
-## Obteniendo el inicio
+## Comenzando
 
-Para empezar a utilizar esta herramienta debes clonar este repositorio y colocarlo en donde quieras en tu servidor SIEM. El lugar donde lo coloques debe tener sufuciente espacio para poder guardar logs. Recomendamos minimo 5 GB. Aunque esta herramienta tiene un sistema de limpieza automatico es bueno tener suficiente espacio.
+Para empezar a utilizar esta herramienta debes clonar este repositorio y colocarlo en donde quieras en tu servidor SIEM. El lugar donde lo coloques debe tener suficiente espacio para poder guardar logs. Recomendamos mínimo 5 GB. Aunque esta herramienta tiene un sistema de limpieza automático, es bueno tener espacio adicional.
 
-Ejecuta en tu terminal para clonar el repositorio:
+Ejecuta este comando en tu terminal para clonar el repositorio:
 
 > git clone --depth 1 https://github.com/Undead34/logrhythm-trend-vision-one.git
 
-Luego crea una copia del archivo `.env.example` y renombrala para `.env`. Aquí hay un ejemplo de como puedes configurar tú archivo `.env`
+Luego crea una copia del archivo `.env.example` y renómbrala para `.env`. Aquí hay un ejemplo de como puedes configurar tu archivo `.env`
 
 ```Properties
 # Regions:
@@ -53,7 +53,7 @@ MAX_NUM_FILES="100"
 LOG_SOURCE_ID="0"
 ```
 
-Luego de eso debes crear en entorno virtual de python. Para eso necesitar tener instalado **Python 3.7** o superior recomendamos **Python 3.10**.
+Luego de eso debes crear en entorno virtual de Python. Para eso necesitar tener instalado **Python 3.7** o superior, recomendamos **Python 3.10**.
 
 En la terminal dentro del proyecto ejecuta:
 
@@ -61,3 +61,4 @@ En la terminal dentro del proyecto ejecuta:
 > .\\.venv\\Scripts\\activate \
 > pip install -r requirements.txt
 
+Si todo está funcionando correctamente debería crearse una carpeta `logs` y allí encontrarás los logs que llegan. Buena suerte.
