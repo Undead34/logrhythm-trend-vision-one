@@ -51,7 +51,7 @@ def parse_OAT(output):
     for x in range(len(output["items"])):
         item = output["items"][x]
 
-        if type_detection.isValid(item):
+        if type_detection.isValid(item) and item.get("source") == "detections":
             detection = type_detection.parser(item)
             OATs.append(detection)
         elif type_endpointActivityData.isValid(item):
