@@ -1,11 +1,10 @@
 from dotenv import load_dotenv
-from os import path
 import os
 
 from .utils import sizeTextToNum
 
 # If no .env file is found, create copy from .env.example
-if not path.exists(".env"):
+if not os.path.exists(".env"):
     print("No se ha encontrado el archivo .env. Creando copia de .env.example...")
     with open(".env.example", "r") as f:
         with open(".env", "w") as f2:
@@ -13,8 +12,6 @@ if not path.exists(".env"):
 
 # Load .env file
 load_dotenv(override=True)
-
-
 
 config = {
     "api": {
@@ -35,9 +32,8 @@ config = {
     "region": os.environ.get("REGION"),
 }
 
-base_path = path.realpath(path.join(path.curdir, "logs"))
+base_path = os.path.realpath(os.path.join(os.path.curdir, "logs"))
 paths = {
-    key: path.realpath(path.join(base_path, key))
-    for key in ["oat"]
+    "logs": base_path,
+    "oat": os.path.join(base_path, "OAT")
 }
-paths["logs"] = base_path
