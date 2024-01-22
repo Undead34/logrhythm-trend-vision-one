@@ -6,16 +6,18 @@ from .constants import paths, config
 
 class TrendMicroLogger():
     def __init__(self) -> None:
-        self.logger = logging.getLogger("TrendMicroLogger")
-        self.logger.setLevel(logging.DEBUG)
-        self.log_folder = paths["oat"]
-        self.log_file = os.path.join(self.log_folder, "trend_micro_oat.log")
-        self.file_handler = handlers.RotatingFileHandler(self.log_file, maxBytes=config["logger"]["max_size"], backupCount=config["logger"]["max_files"])
-        self.file_handler.setFormatter(logging.Formatter("%(message)s"))
-        self.logger.addHandler(self.file_handler)
+        self.oat_logger = logging.getLogger("oat")
+        oat_log_file = os.path.join(paths.get("oat"), "oat.log")
+        self.configure_logger(self.oat_logger, oat_log_file, config[""][""], config[""][""])
 
-    def log(self, message: str):
-            self.logger.info(message)
+    def oat(self, message: str):
+        self.oat_logger.info(message)
+
+    def configure_logger(logger: logging.Logger, log_file: str, max_size: int, max_files: int):
+        logger.setLevel(logging.DEBUG)
+        file_handler = handlers.RotatingFileHandler(log_file, maxBytes=max_size, backupCount=max_files)
+        file_handler.setFormatter(logging.Formatter("%(message)s"))
+        logger.addHandler(file_handler)
 
 class Console(logging.Logger):
     def __init__(self) -> None:

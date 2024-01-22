@@ -49,8 +49,7 @@ def bootstrap():
             raise Exception("No se ha podido iniciar Trend Vision One. Los tests han fallado.")
 
     console.debug("Trend Vision One está listo para funcionar.")
-    trend_vision_one = TrendVisionOne()
-    trend_vision_one.run()
+    TrendVisionOne()
 
 if __name__ == "__main__":
     try:
