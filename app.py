@@ -4,16 +4,17 @@
 import sys
 from datetime import datetime, timezone
 
+if not sys.version_info >= (3, 7):
+    print("Trend Vision One requiere Python 3.7 o superior.")
+    sys.exit(1)
+
+from modules.constants import config
 from modules.errors import TokenExpiredError, TokenNotSetError
 from modules.trend_vision_one import TrendVisionOne
-
 from modules.setup import isfirstStart, setup
-from modules.constants import config
-from modules.loggers import Console
-from modules.tests import test
+from modules.loggers import console
 from modules.cleanup import cleanup
-
-console = Console()
+from modules.tests import test
 
 def bootstrap():
     # Check if API_TOKEN is set

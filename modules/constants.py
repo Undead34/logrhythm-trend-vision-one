@@ -4,8 +4,17 @@ import os
 
 from .utils import sizeTextToNum
 
+# If no .env file is found, create copy from .env.example
+if not path.exists(".env"):
+    print("No se ha encontrado el archivo .env. Creando copia de .env.example...")
+    with open(".env.example", "r") as f:
+        with open(".env", "w") as f2:
+            f2.write(f.read())
+
 # Load .env file
 load_dotenv(override=True)
+
+
 
 config = {
     "api": {
