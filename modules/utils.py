@@ -41,7 +41,6 @@ def getRegion(code: str):
     else:
         return "api.xdr.trendmicro.com"
 
-
 def parse_OAT(output):
     print(f"Preparing to parse OAT detections...")
     type_detection = DetectionsSchema()

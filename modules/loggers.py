@@ -7,13 +7,13 @@ from .constants import paths, config
 class TrendMicroLogger():
     def __init__(self) -> None:
         self.oat_logger = logging.getLogger("oat")
-        oat_log_file = os.path.join(paths.get("oat"), "oat.log")
-        self.configure_logger(self.oat_logger, oat_log_file, config[""][""], config[""][""])
+        oat_log_file = os.path.join(paths.get("oat"), "events.log")
+        self.configure_logger(self.oat_logger, oat_log_file, config["logger"]["max_size"], config["logger"]["max_files"])
 
     def oat(self, message: str):
         self.oat_logger.info(message)
 
-    def configure_logger(logger: logging.Logger, log_file: str, max_size: int, max_files: int):
+    def configure_logger(self, logger: logging.Logger, log_file: str, max_size: int, max_files: int):
         logger.setLevel(logging.DEBUG)
         file_handler = handlers.RotatingFileHandler(log_file, maxBytes=max_size, backupCount=max_files)
         file_handler.setFormatter(logging.Formatter("%(message)s"))
@@ -23,7 +23,12 @@ class Console(logging.Logger):
     def __init__(self) -> None:
         super().__init__("console")
         self.setLevel(logging.DEBUG)
-        self.file_handler = handlers.RotatingFileHandler(os.path.join(os.path.curdir, "schedule-task.log"), encoding="utf-8", maxBytes=1000000, backupCount=5)
+        logger_path = os.path.join(paths.get("logs"), "logs.log")
+
+        if not os.path.exists(paths.get("logs")):
+            os.makedirs(paths.get("logs"), mode=0o755, exist_ok=True)
+
+        self.file_handler = handlers.RotatingFileHandler(os.path.join(paths.get("logs"), "logs.log"), encoding="utf-8")
         self.file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.addHandler(self.file_handler)
 
