@@ -8,7 +8,7 @@ Para empezar a utilizar esta herramienta debes clonar este repositorio y colocar
 
 Ejecuta este comando en tu terminal para clonar el repositorio:
 
-> git clone --depth 1 https://github.com/Undead34/logrhythm-trend-vision-one.git
+    git clone --depth 1 https://github.com/Undead34/logrhythm-trend-vision-one.git
 
 Luego crea una copia del archivo `.env.example` y renómbrala para `.env`. Aquí hay un ejemplo de como puedes configurar tu archivo `.env`
 
@@ -57,8 +57,14 @@ Luego de eso debes crear en entorno virtual de Python. Para eso necesitar tener 
 
 En la terminal dentro del proyecto ejecuta:
 
-> python -m vevn .venv \
-> .\\.venv\\Scripts\\activate \
-> pip install -r requirements.txt
+Crear el entorno virtual:
+
+    python -m vevn .venv
+Activar el entorno virtual
+
+    .\\.venv\\Scripts\\activate
+Instalar las dependencias de Python
+
+    pip install -r requirements.txt
 
 Si todo está funcionando correctamente debería crearse una carpeta `logs` y allí encontrarás los logs que llegan. Buena suerte.
