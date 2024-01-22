@@ -5,8 +5,6 @@ from .errors import AgentError
 from .constants import config
 from .loggers import console
 
-# In this folder we can find many .pos files.
-
 def cleanup():
     # X:\LogRhythm\LogRhythm System Monitor\state\[ID]
     state_path_RAW = f"{get_agent_state()}state\\" + config["log_source_id"]
