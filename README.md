@@ -1,19 +1,63 @@
-## General Description:
-Este es un script para la recoleccion de logs desde Trend Vision One
-Utilizando una la API públida de Trend Micro.
+# LogRhythm Flat File Trend Vision One
+
+Esta herramienta permite te ayuda a confurar LogRhythm con Trend Vision One a través de `Flat File`.
 
 ## Obteniendo el inicio
-Lo primero es crear un archiv __.env__ este archivo se utilizara para cargar las configuraciones
-Para sabes que tiene que tener el __.env__ archivo. Lo que debe hacer es crear un copia  de __.env.example__
-Y Rellenar los campos vamos a ver la aquí algunos de los valores posibles.
 
-Se necesita un token de api, y la fecha de vencimiento del token API, en un caso extraño de que el token nunca se vensa se debe poner el EXPIRATION_TOKEN="INFINITY", en caso de no saber cuando el token vensa dejar en blanco.
+Para empezar a utilizar esta herramienta debes clonar este repositorio y colocarlo en donde quieras en tu servidor SIEM. El lugar donde lo coloques debe tener sufuciente espacio para poder guardar logs. Recomendamos minimo 5 GB. Aunque esta herramienta tiene un sistema de limpieza automatico es bueno tener suficiente espacio.
 
-El EMAIL_REPORT es la direccion de correo electronico para la cual se pueden recibir alert sobre el comportamiento del script. lo mismo para ALTERNATIVE_EMAIL_REPORT
+Ejecuta en tu terminal para clonar el repositorio:
 
-Email y EMAIL_PASSWORD son las credenciales SMPT que se usaran para enviar los correos
+> git clone --depth 1 https://github.com/Undead34/logrhythm-trend-vision-one.git
 
-Max file size se utiliza para determinar el tamaño maximo por archivo de log
-Max num files es el numero maximo de archivos de logs.
+Luego crea una copia del archivo `.env.example` y renombrala para `.env`. Aquí hay un ejemplo de como puedes configurar tú archivo `.env`
 
+```Properties
+# Regions:
+    # Australia=AU
+    # European Union=EU
+    # India=IN
+    # Japan=JP
+    # Singapore=SG
+    # United States=US
+    # United States (for Government)=USGOV
+REGION="US"
+
+API_TOKEN="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...."
+
+# YYYY = Year with century as a decimal number. e.g 2013
+# mm = 	Month as a zero-padded decimal number. e.g  09
+# dd = Day of the month as a zero-padded decimal number. e.g  10
+# HH = 	Hour (24-hour clock) as a zero-padded decimal number. e.g 22
+# MM = Minute as a zero-padded decimal number. e.g 59
+# ss = Second as a zero-padded decimal number. e.g: 05
+# ms = Microsecond as a decimal number, zero-padded to 6 digits. e.g: 000000
+EXPIRATION_DATE_TOKEN="2013-09-10T22:59:05.000000Z" # YYYY-mm-ddTHH:MM:SS:msZ = 2013-09-10T22:59:05.000000Z
+
+# These settings are used to report when an error occurs or when a warning is needed.
+EMAIL_REPORT="jhondoe@example.com"
+ALTERNATIVE_EMAIL_REPORT="janedoe@example.com"
+
+# SMTP Settings
+EMAIL="mailer@example.com"
+EMAIL_PASSWORD="xxx...."
+
+# N or NB or N(K,KB,M,MB,G,GB)
+# N = Number of files
+# N(K,KB,M,MB,G,GB) = Number of bytes in KiloBytes, MegaBytes, GigaBytes 
+MAX_FILE_SIZE="10MB"
+MAX_NUM_FILES="100"
+
+# Enter the "Log Source ID". 
+# This can be found by looking at the Log Source under the Log Sources tab in the console.
 LOG_SOURCE_ID="0"
+```
+
+Luego de eso debes crear en entorno virtual de python. Para eso necesitar tener instalado **Python 3.7** o superior recomendamos **Python 3.10**.
+
+En la terminal dentro del proyecto ejecuta:
+
+> python -m vevn .venv \
+> .\\.venv\\Scripts\\activate \
+> pip install -r requirements.txt
+
