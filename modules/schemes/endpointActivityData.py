@@ -160,7 +160,7 @@ class EndpointActivityData:
         details += "Process PID: " + str(object_details.get("processPid")) + "\n"
         details += "Process User: " + str(object_details.get("processUser")) + "\n"
         details += "Tags: " + str(object_details.get("tags")) + "\n"
-        details += "UUID: " + str(object_details.get("uuid")) + "\n"
+        details += "Details UUID: " + str(object_details.get("uuid")) + "\n"
         details += "Product Code: " + str(object_details.get("productCode")) + "\n"
         details += "Filter Risk Level: " + str(object_details.get("filterRiskLevel")) + "\n"
         details += "OS Description: " + str(object_details.get("osDescription")) + "\n"

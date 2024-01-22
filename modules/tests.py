@@ -3,11 +3,12 @@ import json
 import os
 
 from .constants import config, paths
+from .loggers import console
 from .errors import NetworkError, FileSystemError
 
 def _network_test():
     try:
-        print("Comprobando conexión con Trend Vision One...")
+        console.debug("Comprobando conexión con Trend Vision One...")
         url_base = "https://api.xdr.trendmicro.com"
         url_path = "/v3.0/healthcheck/connectivity"
         token = config["api"]["token"]
@@ -50,7 +51,7 @@ def _network_test():
 
 def _paths_test():
     try:
-        print("Comprobando directorios necesarios para el funcionamiento de Trend Vision One...")
+        console.debug("Comprobando directorios necesarios para el funcionamiento de Trend Vision One...")
         for key, value in paths.items():
             if not os.path.exists(value):
                 raise FileSystemError(f"El directorio {key} no existe.")
@@ -64,18 +65,18 @@ def _paths_test():
         raise FileSystemError("No se han podido crear los directorios necesarios para el funcionamiento de Trend Vision One.")
     return True
 
-def test():    
+def test():
     try:
         _network_test()
         _paths_test()
         return True
     except NetworkError as e:
-        print("NetworkError in test function")
+        console.debug("NetworkError in test function")
         e.report()
     except FileSystemError as e:
-        print("FileSystemError in test function")
+        console.debug("FileSystemError in test function")
         e.report()
     except Exception as e:
-        print(e)
+        console.error(e.message)
     
     return False

@@ -21,7 +21,7 @@ class Console(logging.Logger):
     def __init__(self) -> None:
         super().__init__("console")
         self.setLevel(logging.DEBUG)
-        self.file_handler = handlers.RotatingFileHandler(os.path.join(os.path.curdir, "schedule-task.log"))
+        self.file_handler = handlers.RotatingFileHandler(os.path.join(os.path.curdir, "schedule-task.log"), encoding="utf-8", maxBytes=1000000, backupCount=5)
         self.file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.addHandler(self.file_handler)
 
@@ -32,3 +32,5 @@ class Console(logging.Logger):
 
     def warn(self, message: str):
         self.warning(message)
+
+console = Console()

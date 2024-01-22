@@ -2,6 +2,7 @@ from os import path
 import os
 
 from .constants import paths
+from .loggers import console
 
 def isfirstStart():
     firstStart = False
@@ -12,6 +13,6 @@ def isfirstStart():
     return firstStart
 
 def setup():
-    print("Configurando Trend Vision One...")
+    console.debug("Configurando Trend Vision One...")
     os.makedirs(paths["logs"], exist_ok=True)
     os.makedirs(paths["oat"], exist_ok=True)

@@ -5,9 +5,8 @@ import os
 
 from datetime import datetime, timezone, timedelta
 import requests
-import json
 
-from .loggers import TrendMicroLogger
+from .loggers import TrendMicroLogger, console
 from .errors import AgentError
 from .constants import config
 from .utils import parse_OAT
@@ -17,9 +16,11 @@ class TrendVisionOne:
         self.logger = TrendMicroLogger()
 
     def run(self):
-        self.get_OAT()
+        self._cleanup()
+        self._get_OAT()
 
-    def get_OAT(self):
+    def _get_OAT(self):
+        console.debug("Comenzando la obtención de OAT...")
         url_base = "https://api.xdr.trendmicro.com"
         url_path = "/v3.0/oat/detections"
         token = config["api"]["token"]
@@ -37,29 +38,34 @@ class TrendVisionOne:
 
         r = requests.get(url_base + url_path, params=query_params, headers=headers)
 
-        print(r.status_code)
+        console.debug(r.status_code)
         for k, v in r.headers.items():
-            print(f"{k}: {v}")
-        print("")
+            console.debug(f"{k}: {v}")
+        console.debug("")
         
         if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
             output = r.json()
-            print(output.get("totalCount"))
+            console.debug(output.get("totalCount"))
             self._save_OAT(parse_OAT(output))
         else:
-            print(r.text)
+            console.debug(r.text)
 
-    def _save_OAT(self, OATs: list[str]):
-        print(f"Saving OAT detections...")
-        for OAT in OATs:
-            self.logger.log(OAT)
+        console.debug("Tarea completada.")
 
     def _cleanup(self):
+        console.debug("Comezando la limpieza...")
+        
         # In this folder we can find many .pos files.
         # X:\LogRhythm\LogRhythm System Monitor\state\[ID]
         agent_state = self._get_agent_state()
         log_source_pos_dir = f"{agent_state}state\\{config['log_source_id']}"
         self.move_completed_files(log_source_pos_dir, config["paths"]["archived"])
+        console.debug("Limpieza completada.")
+
+    def _save_OAT(self, OATs: list[str]):
+        console.debug("Saving OAT detections...")
+        for OAT in OATs:
+            self.logger.log(OAT)
 
     # Getting Agent state location from registry.
     def _get_agent_state(self):
@@ -72,8 +78,7 @@ class TrendVisionOne:
                 "No se pudo encontrar la ubicación del estado del agente.\nPor favor, asegúrese de que el agente esté instalado."
             )
         except Exception as e:
-            print(e)
-            print(type(e))
+            console.error(f"Type: {type(e)}\n{e.message}")
 
     def _move_completed_files(self, pos_dir, archive_path):
         file_count = 0
@@ -88,14 +93,12 @@ class TrendVisionOne:
                 file_info = f.read().split("\n")  # file_info = [path, number, number]
 
             if path.exists(file_info[0]):  # Check if the file exists
-                if path.getsize(file_info[0]) == int(
-                    file_info[1]
-                ):  # Check if the file size is equal to the size in the .pos file
+                if path.getsize(file_info[0]) == int(file_info[1]):  # Check if the file size is equal to the size in the .pos file
                     dest_fname = path.basename(file_info[0])
                     shutil.move(file_info[0], path.join(archive_path, dest_fname))
-                    print(
+                    console.debug(
                         f"Read of {file_info[0]} complete. Moved to {path.join(archive_path, dest_fname)}"
                     )
                     file_count += 1
 
-        print(f"{file_count} files moved.")
+        console.debug(f"{file_count} files moved.")
