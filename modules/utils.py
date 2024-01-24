@@ -1,8 +1,5 @@
 from datetime import datetime, timezone
 
-from .schemes.detections import DetectionsSchema
-from .schemes.endpointActivityData import EndpointActivityData
-
 def sizeTextToNum(size: str):
     """Converts a size string to a number of bytes
     Args:
@@ -59,31 +56,3 @@ def getTokenDays(expiration: str):
         return (expiration - today).days
     except:
         return 0
-
-def parse_OAT(output):
-    print(f"Preparing to parse OAT detections...")
-    type_detection = DetectionsSchema()
-    type_endpointActivityData = EndpointActivityData()
-
-    OATs = []
-
-    for x in range(len(output["items"])):
-        item = output["items"][x]
-
-        if type_detection.isValid(item) and item.get("source") == "detections":
-            detection = type_detection.parser(item)
-            OATs.append(detection)
-        elif type_endpointActivityData.isValid(item):
-            endpointActivityData = type_endpointActivityData.parser(item)
-            OATs.append(endpointActivityData)
-        else:
-            print(
-                "Se ha encontrado un nuevo tipo de objeto. Hay que realizar el esquema."
-            )
-            # TODO: Realizar el esquema
-            # print(item)
-
-    print("Número de OATs: " + str(output["count"]))
-    print("Número de OATs válidos: " + str(len(OATs)))
-    print("Número de OATs inválidos: " + str(output["count"] - len(OATs)))
-    return OATs

@@ -52,7 +52,7 @@ def bootstrap():
     cleanup()
 
     console.debug("Trend Vision One está listo para funcionar.")
-    # TrendVisionOne()
+    TrendVisionOne()
 
 if __name__ == "__main__":
     try:        

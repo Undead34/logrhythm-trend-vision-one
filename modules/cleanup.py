@@ -42,6 +42,8 @@ def cleanup():
                 console.error(f"Error al leer el archivo {file} Type: {type(e)}: {e}")
 
         console.debug(f"{file_count} files removed.")
+    except AgentError as e:
+        console.error(e.message)
     except Exception as e:
         console.error(f"Type: {type(e)}\n{e.message}")
 

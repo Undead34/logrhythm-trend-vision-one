@@ -28,6 +28,8 @@ def _network_test():
         else:
             message += r.text
         
+        # print(message)
+
         if r.status_code == 401:
             raise NetworkError(
                 "[URGENTE]!!! El token de Trend Vision One ha expirado o no es válido.\n"
