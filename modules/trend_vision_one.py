@@ -2,8 +2,8 @@ from datetime import datetime, timezone, timedelta
 import requests
 
 from .loggers import TrendMicroLogger, console
-from .constants import config
 from .utils import parse_OAT, getRegion
+from .constants import config
 
 class TrendVisionOne:
     def __init__(self):

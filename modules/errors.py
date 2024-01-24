@@ -1,5 +1,5 @@
 from .mailer import send_email
-from .clockutils import getISO8601Time
+from .utils import getISO8601Time
 
 class NetworkError(Exception):
     def __init__(self, message):

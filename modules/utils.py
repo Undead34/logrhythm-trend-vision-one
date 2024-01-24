@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from .schemes.detections import DetectionsSchema
 from .schemes.endpointActivityData import EndpointActivityData
 
@@ -21,6 +23,8 @@ def sizeTextToNum(size: str):
     else:
         return int(size)
 
+def getISO8601Time():
+    return datetime.now().isoformat()
 
 # return URL for region by region code e.g "US" -> "api.xdr.trendmicro.com"
 def getRegion(code: str):
@@ -40,6 +44,21 @@ def getRegion(code: str):
         return "api.usgov.xdr.trendmicro.com"
     else:
         return "api.xdr.trendmicro.com"
+
+def getTokenDays(expiration: str):
+    """Returns the number of days until the token expires
+    Args:
+        token (str): The token to check
+    Returns:
+        int: The number of days until the token expires
+    """
+    try:
+        expiration = datetime.strptime(expiration, "%Y-%m-%dT%H:%M:%S.%fZ")
+        expiration = expiration.astimezone(timezone.utc)
+        today = datetime.now(timezone.utc)
+        return (expiration - today).days
+    except:
+        return 0
 
 def parse_OAT(output):
     print(f"Preparing to parse OAT detections...")

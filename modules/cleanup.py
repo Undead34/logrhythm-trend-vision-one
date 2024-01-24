@@ -6,41 +6,44 @@ from .constants import config
 from .loggers import console
 
 def cleanup():
-    # X:\LogRhythm\LogRhythm System Monitor\state\[ID]
-    state_path_RAW = f"{get_agent_state()}state\\" + config["log_source_id"]
-    state_path = os.path.normpath(state_path_RAW)
-    console.debug(f"Path to LogRhythm state: {state_path}")
+    try:
+        # X:\LogRhythm\LogRhythm System Monitor\state\[ID]
+        state_path_RAW = f"{get_agent_state()}state\\" + config["log_source_id"]
+        state_path = os.path.normpath(state_path_RAW)
+        console.debug(f"Path to LogRhythm state: {state_path}")
 
-    file_count = 0
+        file_count = 0
 
-    if not os.path.exists(state_path):
-        console.error("No se ha encontrado el directorio de estado de LogRhythm.")
-        return
+        if not os.path.exists(state_path):
+            console.error("No se ha encontrado el directorio de estado de LogRhythm.")
+            return
 
-    for file in os.listdir(state_path): # Iterate through all files in the directory
-        if not file.endswith(".pos"):
-            continue
+        for file in os.listdir(state_path): # Iterate through all files in the directory
+            if not file.endswith(".pos"):
+                continue
 
-        try:
-            with open(os.path.join(state_path, file), "r") as f:  # Open the file
-                # Pos file example content:
-                # X:\path\to\vision_one.log
-                # 12478343
-                # 638408987240279906
-                pos_file = f.read().split("\n")  # pos_file = [path, number, number]
-                
-                if not os.path.exists(pos_file[0]):  # Check if the file exists
-                    continue
+            try:
+                with open(os.path.join(state_path, file), "r") as f:  # Open the file
+                    # Pos file example content:
+                    # X:\path\to\vision_one.log
+                    # 12478343
+                    # 638408987240279906
+                    pos_file = f.read().split("\n")  # pos_file = [path, number, number]
+                    
+                    if not os.path.exists(pos_file[0]):  # Check if the file exists
+                        continue
 
-                # Check if the file size is equal to the size in the .pos file
-                if os.path.getsize(pos_file[0]) == int(pos_file[1]):  
-                    os.remove(pos_file[0])
-                    console.debug(f"Read of {pos_file[0]} complete.")
-                    file_count += 1
-        except Exception as e:
-            console.error(f"Error al leer el archivo {file} Type: {type(e)}: {e}")
+                    # Check if the file size is equal to the size in the .pos file
+                    if os.path.getsize(pos_file[0]) == int(pos_file[1]):  
+                        os.remove(pos_file[0])
+                        console.debug(f"Read of {pos_file[0]} complete.")
+                        file_count += 1
+            except Exception as e:
+                console.error(f"Error al leer el archivo {file} Type: {type(e)}: {e}")
 
-    console.debug(f"{file_count} files removed.")
+        console.debug(f"{file_count} files removed.")
+    except Exception as e:
+        console.error(f"Type: {type(e)}\n{e.message}")
 
 # Getting Agent state location from registry.
 def get_agent_state():
