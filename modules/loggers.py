@@ -11,7 +11,10 @@ class TrendMicroLogger():
         self.configure_logger(self.oat_logger, oat_log_file, config["logger"]["max_size"], config["logger"]["max_files"])
 
     def oat(self, message: str):
-        self.oat_logger.info(message)
+        try:
+            self.oat_logger.info(message)
+        except Exception as e:
+            print(e)
 
     def configure_logger(self, logger: logging.Logger, log_file: str, max_size: int, max_files: int):
         logger.setLevel(logging.DEBUG)
