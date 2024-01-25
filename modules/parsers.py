@@ -147,6 +147,7 @@ import json
 #   }
 # }
 
+
 def parse_OAT(output):
     console.debug("Preparing to parse OAT detections...")
     totalCount = output.get("totalCount")
@@ -156,111 +157,253 @@ def parse_OAT(output):
 
     if count < totalCount:
         console.warn(
-            f"There are more detections than the ones shown. Please, increase the 'top' parameter. (Current: {count}, Total: {totalCount})")
+            f"There are more detections than the ones shown. Please, increase the 'top' parameter. (Current: {count}, Total: {totalCount})"
+        )
 
     for i in range(len(items)):
         item = items[i]
         if item.get("source") == "detections":
-            pass
-            OATs.append(detections_OAT(item))
+            data = convert_object(item)
+            selected_keys = {
+                "source",
+                "uuid",
+                "detectedDateTime",
+                "ingestedDateTime",
+                "entityType",
+                "entityName",
+                "endpointName",
+                "ips",
+                "filterRiskLevel",
+                "endpointHostName",
+                "processCmd",
+                "objectType",
+                "processFilePath",
+                "tags",
+                "tacticId",
+                "ruleName",
+                "eventName",
+                "eventSubName",
+                "parentCmd",
+                "parentFilePath",
+                "parentFileHashSha256",
+                "processFileHashSha256",
+                "policyId",
+                "processName",
+                "processPid",
+                "parentPid",
+                "processFilePath",
+                "processCmd",
+            }
+
+            selected_elements, other_elements = process_object(data, selected_keys)
+            OATs.append("".join(selected_elements + other_elements))
         else:
-            OATs.append(detections_OAT(item, False))
+            data = convert_object(item)
+            selected_keys = {
+                "entityName",
+                "description",
+                "mitreTacticIds",
+                "mitreTechniqueIds",
+                "endpointName",
+                "ips",
+                "endpointHostName",
+                "osDescription",
+                "processHashId",
+                "processName",
+                "processPid",
+                "processUser",
+                "processUserDomain",
+                "processLaunchTime",
+                "processCmd",
+                "processFileHashId",
+                "processFilePath",
+                "processFileHashSha256",
+                "objectUser",
+                "objectUserDomain",
+                "objectSessionId",
+                "objectFilePath",
+                "objectFileHashSha256",
+                "objectFileSize",
+                "objectName",
+                "objectPid",
+                "objectCmd",
+                "objectRunAsLocalAccount",
+                "tags",
+                "highlightedObjects",
+            }
+            selected_elements, other_elements = process_object(data, selected_keys)
+            # OATs.append("".join(selected_elements + other_elements))
 
     return OATs
 
 
-def detections_OAT(item, isDetection=True):
-    detection = ""
+def process_object(data, selected_keys):
+    selected_elements = []
+    other_elements = []
 
-    # Principales
-    detection += f"source: {str(item.get('source'))}#"
-    detection += f"uuid: {str(item.get('uuid'))}#"
-    detection += f"detectedDateTime: {str(item.get('detectedDateTime'))}#"
-    detection += f"ingestedDateTime: {str(item.get('ingestedDateTime'))}#"
-    detection += f"entityType: {str(item.get('entityType'))}#"
-    detection += f"entityName: {str(item.get('entityName'))}#"
-
-    detail = item.get("detail")
-
-    # Detalles
-    excludeKeys = None
-    if isDetection:
-        excludeKeys = [
-            "objectFileName",
-            "objectFilePath",
-            "objectFileSize",
-            "objectFileHashSha1",
-            "filePath",
-            "fileHash",
-            "objectType",
-            "ruleName",
-            "malName",
-            "eventName",
-            "eventSubName",
-            "fullPath",
-            "eventId",
-            "scanType",
-            "malDst",
-            "domainName",
-            "malType",
-            "firstActResult",
-            "channel",
-            "malFamily",
-        ] 
-    else:
-        excludeKeys = [
-            "endpointHostName",
-            "objectCmd",
-            "objectFileHashMd5",
-            "objectFileHashSha1",
-            "objectFileHashSha256",
-            "objectFilePath",
-            "objectHashId",
-            "objectName",
-            "objectPid",
-            "objectUser",
-            "objectUserDomain",
-            "processCmd",
-            "processFileHashSha1",
-            "processFilePath",
-            "processName",
-            "processPid",
-            "processUser",
-            "osDescription",
-            "processUserDomain",
-            "osName",
-            "objectFileSize",
-            "objectRunAsLocalAccount",
-        ]
-
-    for key in excludeKeys:
-        detection += f"{key}: {str(detail.get('{key}'))}#"
-
-    for key, value in detail.items():
-        if (key not in excludeKeys):
-            if key == "msg":
-                if type(value) == str:
-                    value = value.encode()
-                value = binascii.b2a_base64(value)
-
-            if isinstance(value, (str, bool, int, list)):
-                detection += f"{key}: {str(value[0] if isinstance(value, list) and len(value) == 1 else str(value))}#"
+    for item in data:
+        for key, value in item.items():
+            if key in selected_keys:
+                selected_elements.append(f"{key.upper()}: {value}")
             else:
-                detection += f"{key}: {str(value)}#"
+                other_elements.append(f"{key.upper()}: {value}")
 
-    filters = item.get("filters")
+    # Ordena las listas alfabéticamente
+    selected_elements.sort()
+    other_elements.sort()
 
-    for x in range(len(filters)):
-        _filter = filters[x]
-        highlightedObjects = _filter.get("highlightedObjects")
+    return selected_elements, other_elements
 
-        for obj in highlightedObjects:
-            if isinstance(value, (str, bool, int, list)):
-                detection += f"{obj.get('field')}: {str(obj.get('value')[0] if isinstance(obj.get('value'), list) and len(obj.get('value')) == 1 else obj.get('value'))}#"
+def convert_object(data):
+    converted_data = []
+
+    # Ordena las claves alfabéticamente, excluyendo "filters"
+    for key in sorted(data.keys()):
+        if key != "filters":
+            if isinstance(data[key], dict):
+                # Recurre a objetos anidados (como "detail")
+                converted_data.extend(convert_object(data[key]))
             else:
-                detection += f"filter_{obj.get('field')}: {str(obj.get('value'))}#"
+                if key == "msg":
+                    if type(data[key]) == str:
+                        data[key] = data[key].encode()
+                    data[key] = binascii.b2a_base64(data[key])
+                
+                converted_data.append({f"{key}": str(data[key])})
 
-    return detection
+    # Procesa los "filters" al final, ordenando sus claves también
+    if "filters" in data:
+        for filter_data in data["filters"]:
+            for key in sorted(filter_data.keys()):
+                converted_data.append(
+                    {f"{key}": str(filter_data[key])}
+                )  # Aquí estaba el error
+
+    return converted_data
+
+
+#     activity = ""
+
+#     # Principales
+#     activity += f"source: {str(item.get('source'))}#"
+#     activity += f"uuid: {str(item.get('uuid'))}#"
+#     activity += f"detectedDateTime: {str(item.get('detectedDateTime'))}#"
+#     activity += f"ingestedDateTime: {str(item.get('ingestedDateTime'))}#"
+#     activity += f"entityType: {str(item.get('entityType'))}#"
+#     activity += f"entityName: {str(item.get('entityName'))}#"
+
+#     detail = item.get("detail")
+
+#     excludeKeys = [
+#         "endpointHostName",
+#         "objectCmd",
+#         "objectFileHashMd5",
+#         "objectFileHashSha1",
+#         "objectFileHashSha256",
+#         "objectFilePath",
+#         "objectHashId",
+#         "objectName",
+#         "objectPid",
+#         "objectUser",
+#         "objectUserDomain",
+#         "processCmd",
+#         "processFileHashSha1",
+#         "processFilePath",
+#         "processName",
+#         "processPid",
+#         "processUser",
+#         "osDescription",
+#         "processUserDomain",
+#         "osName",
+#         "objectFileSize",
+#         "objectRunAsLocalAccount",
+#     ]
+
+#     for key in excludeKeys:
+#         activity += f"{key}: {str(detail.get(f'{key}'))}#"
+
+#     return activity
+
+# def detections_OAT(item):
+#     detection = ""
+
+#     # Principales
+#     detection += f"source: {str(item.get('source'))}#"
+#     detection += f"uuid: {str(item.get('uuid'))}#"
+#     detection += f"detectedDateTime: {str(item.get('detectedDateTime'))}#"
+#     detection += f"ingestedDateTime: {str(item.get('ingestedDateTime'))}#"
+#     detection += f"entityType: {str(item.get('entityType'))}#"
+#     detection += f"entityName: {str(item.get('entityName'))}#"
+
+#     detail = item.get("detail")
+
+#     # Detalles
+#     excludeKeys = [
+#         "objectFileName",
+#         "objectFilePath",
+#         "objectFileSize",
+#         "objectFileHashSha1",
+#         "filePath",
+#         "fileHash",
+#         "objectType",
+#         "ruleName",
+#         "malName",
+#         "eventName",
+#         "eventSubName",
+#         "fullPath",
+#         "eventId",
+#         "scanType",
+#         "malDst",
+#         "domainName",
+#         "malType",
+#         "firstActResult",
+#         "channel",
+#         "malFamily",
+#     ]
+
+#     for key in excludeKeys:
+#         activity += f"{key}: {str(detail.get(f'{key}'))}#"
+
+#     # source: endpointActivityData#uuid: 70a7fcc3-a429-4bd0-9f8e-cdff7677026a#detectedDateTime: 2024-01-25T16:29:01Z#ingestedDateTime: 2024-01-25T16:32:53Z#entityType: endpoint#entityName: CJ2501VE01(fe80::44d6:a52c:d0:b201,172.16.113.21)#endpointHostName: CJ2501VE01#objectCmd: sc  query OracleServiceXSTOREDB #objectFileHashMd5: 3fb5cf71f7e7eb49790cb0e663434d80#objectFileHashSha1: b4979a9f970029889713d756c3f123643dde73da#objectFileHashSha256: 41f067c3a11b02fe39947f9eba68ae5c7cb5bd1872a6009a4cd1506554a9aba9#objectFilePath: C:\Windows\System32\sc.exe#objectHashId: -582481833512562970#objectName: C:\Windows\System32\sc.exe#objectPid: 19676#objectUser: UCJ2501VE01#objectUserDomain: FARMATODO#processCmd: C:\Windows\SYSTEM32\cmd.exe /c ""c:\mantenimiento\check_xstoredbsvc.bat""#processFileHashSha1: f1efb0fddc156e4c61c5f78a54700e4e7984d55d#processFilePath: C:\Windows\System32\cmd.exe#processName: C:\Windows\System32\cmd.exe#processPid: 20024#processUser: UCJ2501VE01#osDescription: Windows 10 Pro (64 bit) build 19044#processUserDomain: FARMATODO#osName: Windows#objectFileSize: 72192#objectRunAsLocalAccount: False#
+
+#     for key, value in detail.items():
+#         if key not in excludeKeys:
+#             if key == "msg":
+#                 if type(value) == str:
+#                     value = value.encode()
+#                 value = binascii.b2a_base64(value)
+
+#             if isinstance(value, (str, bool, int, list)):
+#                 detection += f"{key}: {str(value[0] if isinstance(value, list) and len(value) == 1 else str(value))}#"
+#             else:
+#                 detection += f"{key}: {str(value)}#"
+
+#     filters = item.get("filters")
+
+#     for x in range(len(filters)):
+#         _filter = filters[x]
+#         highlightedObjects = _filter.get("highlightedObjects")
+
+#         for obj in highlightedObjects:
+#             if isinstance(value, (str, bool, int, list)):
+#                 detection += f"{obj.get('field')}: {str(obj.get('value')[0] if isinstance(obj.get('value'), list) and len(obj.get('value')) == 1 else obj.get('value'))}#"
+#             else:
+#                 detection += f"filter_{obj.get('field')}: {str(obj.get('value'))}#"
+
+#     return detection
+
+
+# for key, value in detail.items():
+#     if (key not in excludeKeys):
+#         if key == "msg":
+#             if type(value) == str:
+#                 value = value.encode()
+#             value = binascii.b2a_base64(value)
+
+#         if isinstance(value, (str, bool, int, list)):
+#             detection += f"{key}: {str(value[0] if isinstance(value, list) and len(value) == 1 else str(value))}#"
+#         else:
+#             detection += f"{key}: {str(value)}#"
 
 
 # type_detection = DetectionsSchema()
