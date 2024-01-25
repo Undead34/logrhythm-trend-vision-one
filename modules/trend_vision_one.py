@@ -21,14 +21,14 @@ class TrendVisionOne:
             token = config["api"]["token"]
 
             query_params = {
-                "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=8)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "detectedEndDateTime": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "top": 100,
             }
 
             headers = {
                 "Authorization": "Bearer " + token,
-                "TMV1-Filter": "(riskLevel eq 'critical')", # Filtros
+                "TMV1-Filter": "(riskLevel eq 'low') or (riskLevel eq 'medium') or (riskLevel eq 'high') or (riskLevel eq 'critical')", # Filtros
             }
 
             r = requests.get(url_base + url_path, params=query_params, headers=headers)
@@ -40,7 +40,6 @@ class TrendVisionOne:
             
             if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
                 output = r.json()
-                console.debug(output.get("totalCount"))
                 logs = parse_OAT(output)
 
                 console.debug("Saving OAT detections...")
