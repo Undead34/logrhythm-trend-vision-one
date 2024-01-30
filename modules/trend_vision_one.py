@@ -101,8 +101,5 @@ class TrendVisionOne:
             console.error(e)
 
     def _getSegDiff(self, seconds: int):
-        return datetime.now(tz=timezone.utc) - timedelta(seconds=seconds).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    #  datetime.now(tz=timezone.utc)
-    #                 - timedelta(seconds=)
-    #             ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        diff: datetime = datetime.now(tz=timezone.utc) - timedelta(seconds=seconds)
+        return diff.strftime("%Y-%m-%dT%H:%M:%SZ")
