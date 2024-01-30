@@ -21,10 +21,9 @@ class TrendVisionOne:
             token = config["api"]["token"]
 
             query_params = {
-                "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "detectedEndDateTime": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "top": 200
-                ,
+                "top": 500
             }
 
             # RAWDATASTR

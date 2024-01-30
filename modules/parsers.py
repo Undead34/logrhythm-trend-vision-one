@@ -18,34 +18,34 @@ def parse_OAT(output):
         if item.get("source") == "detections":
             data = convert_object(item)
             selected_keys = {
-                "source",
-                "uuid",
-                "detectedDateTime",
-                "ingestedDateTime",
-                "entityType",
-                "entityName",
-                "endpointName",
-                "ips",
-                "filterRiskLevel",
-                "endpointHostName",
-                "processCmd",
-                "objectType",
-                "processFilePath",
-                "tags",
-                "tacticId",
-                "ruleName",
-                "eventName",
-                "eventSubName",
-                "parentCmd",
-                "parentFilePath",
-                "parentFileHashSha256",
-                "processFileHashSha256",
-                "policyId",
-                "processName",
-                "processPid",
-                "parentPid",
-                "processFilePath",
-                "processCmd",
+                "SOURCE",
+                "UUID",
+                "DETECTEDDATETIME",
+                "INGESTEDDATETIME",
+                "ENTITYTYPE",
+                "ENTITYNAME",
+                "ENDPOINTNAME",
+                "IPS",
+                "FILTERRISKLEVEL",
+                "ENDPOINTHOSTNAME",
+                "PROCESSCMD",
+                "OBJECTTYPE",
+                "PROCESSFILEPATH",
+                "TAGS",
+                "TACTICID",
+                "RULENAME",
+                "EVENTNAME",
+                "EVENTSUBNAME",
+                "PARENTCMD",
+                "PARENTFILEPATH",
+                "PARENTFILEHASHSHA256",
+                "PROCESSFILEHASHSHA256",
+                "POLICYID",
+                "PROCESSNAME",
+                "PROCESSPID",
+                "PARENTPID",
+                "PROCESSFILEPATH",
+                "PROCESSCMD",
             }
 
             selected_elements, other_elements = process_object(data, selected_keys)
@@ -54,36 +54,35 @@ def parse_OAT(output):
         else:
             data = convert_object(item)
             selected_keys = {
-                "entityName",
-                "description",
-                "mitreTacticIds",
-                "mitreTechniqueIds",
-                "endpointName",
-                "ips",
-                "endpointHostName",
-                "osDescription",
-                "processHashId",
-                "processName",
-                "processPid",
-                "processUser",
-                "processUserDomain",
-                "processLaunchTime",
-                "processCmd",
-                "processFileHashId",
-                "processFilePath",
-                "processFileHashSha256",
-                "objectUser",
-                "objectUserDomain",
-                "objectSessionId",
-                "objectFilePath",
-                "objectFileHashSha256",
-                "objectFileSize",
-                "objectName",
-                "objectPid",
-                "objectCmd",
-                "objectRunAsLocalAccount",
-                "tags",
-                "highlightedObjects",
+                "ENTITYNAME",
+                "DESCRIPTION",
+                "MITRETACTICIDS",
+                "MITRETECHNIQUEIDS",
+                "ENDPOINTNAME",
+                "IPS",
+                "ENDPOINTHOSTNAME",
+                "OSDESCRIPTION",
+                "PROCESSHASHID",
+                "PROCESSNAME",
+                "PROCESSPID",
+                "PROCESSUSER",
+                "PROCESSUSERDOMAIN",
+                "PROCESSLAUNCHTIME",
+                "PROCESSCMD",
+                "PROCESSFILEHASHID",
+                "PROCESSFILEPATH",
+                "PROCESSFILEHASHSHA256",
+                "OBJECTUSER",
+                "OBJECTUSERDOMAIN",
+                "OBJECTSESSIONID",
+                "OBJECTFILEPATH",
+                "OBJECTFILEHASHSHA256",
+                "OBJECTFILESIZE",
+                "OBJECTNAME",
+                "OBJECTPID",
+                "OBJECTCMD",
+                "OBJECTRUNASLOCALACCOUNT",
+                "TAGS",
             }
             selected_elements, other_elements = process_object(data, selected_keys)
             OATs.append("".join(selected_elements + other_elements).replace("\n", ""))
@@ -92,7 +91,7 @@ def parse_OAT(output):
     print("Número de OATs: " + str(output["count"]))
     print("Número de OATs válidos: " + str(len(OATs)))
     print("Número de OATs inválidos: " + str(output["count"] - len(OATs)))
-    return []
+    return OATs
 
 def process_object(data, selected_keys):
     selected_elements = []
@@ -100,18 +99,12 @@ def process_object(data, selected_keys):
 
     for item in data:
         for key, value in item.items():
-
-            if (key == "OBJECTRAWDATASTR"):
-                # Chesk if value contains a only valid ASCII characters
-                try:
-                    value: bytes = value.encode()
-                    print(f"Is ASCII: {value.isascii()} -  {value}")
-
-                    print(value)
-                except Exception as e:
-                    print("Error en la conversión de OBJECTRAWDATASTR")
-                continue
-
+            if (key == "OBJECTRAWDATASTR" or key == "HIGHLIGHTEDOBJECTS"):
+                value: bytes = value.encode()
+                if not value.isascii():
+                    value = binascii.b2a_base64(value)
+                else:
+                    value = value.decode().replace("\n", "")
 
             if key in selected_keys:
                 selected_elements.append(f"{key.upper()}: {value}")
