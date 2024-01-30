@@ -27,13 +27,14 @@ config = {
     },
     "logger": {
         "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE")),
-        "max_files": int(os.environ.get("MAX_NUM_FILES")),  
+        "max_files": int(os.environ.get("MAX_NUM_FILES")),
     },
     "log_source_id": os.environ.get("LOG_SOURCE_ID"),
+    "oat": {
+        "timedelta": int(os.environ.get("OAT_TIMEDELTA")),
+        "top": int(os.environ.get("OAT_TOP")),
+    },
 }
 
 base_path = os.path.realpath(os.path.join(os.path.curdir, "logs"))
-paths = {
-    "logs": base_path,
-    "oat": os.path.join(base_path, "OAT")
-}
+paths = {"logs": base_path, "oat": os.path.join(base_path, "OAT")}

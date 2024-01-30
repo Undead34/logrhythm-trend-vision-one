@@ -1,7 +1,7 @@
 from .loggers import console
 import binascii
 
-def parse_OAT(output):
+def parseOATEvents(output):
     console.debug("Preparing to parse OAT detections...")
     totalCount = output.get("totalCount")
     count = output.get("count")
