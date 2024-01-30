@@ -10,7 +10,7 @@ if not os.path.exists(".env"):
         with open(".env", "w") as f2:
             f2.write(f.read())
 
-# Load .env file
+# Load .env file and override if already exists
 load_dotenv(override=True)
 
 config = {
@@ -26,15 +26,21 @@ config = {
         "password": os.environ.get("EMAIL_PASSWORD"),
     },
     "logger": {
-        "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE")),
-        "max_files": int(os.environ.get("MAX_NUM_FILES")),
+        "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE")) or sizeTextToNum("8MB"),
+        "max_files": int(os.environ.get("MAX_NUM_FILES")) or 50,
     },
     "log_source_id": os.environ.get("LOG_SOURCE_ID"),
     "oat": {
-        "timedelta": int(os.environ.get("OAT_TIMEDELTA")),
-        "top": int(os.environ.get("OAT_TOP")),
+        "timedelta": int(os.environ.get("OAT_TIMEDELTA")) or 300,
+        "top": int(os.environ.get("OAT_TOP")) or 50,
     },
 }
 
 base_path = os.path.realpath(os.path.join(os.path.curdir, "logs"))
-paths = {"logs": base_path, "oat": os.path.join(base_path, "OAT")}
+paths = {
+    "logs": base_path,
+    "oat": os.path.join(base_path, "Observed Attack Techniques"),
+    "audit": os.path.join(base_path, "Audit Logs"),
+    "detection": os.path.join(base_path, "Detection Data"),
+    "workbench": os.path.join(base_path, "Workbench"),
+}

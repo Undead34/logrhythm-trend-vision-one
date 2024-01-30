@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-import requests
+import requests, json
 
 from .loggers import TrendMicroLogger, console
 from .constants import config
@@ -10,37 +10,65 @@ from .utils import getRegion
     Clase que se encarga de obtener los eventos arronjados por Trend Vision One
     y guardarlos en el archivo de logs.
 """
+
+
 class TrendVisionOne:
     def __init__(self):
         self.logger = TrendMicroLogger()
         self.getObservedAttackTechniques()
 
+    def getDetectionData(self):
+        console.debug("Comenzando la obtención de Detection Data events...")
+
+        query_params = {
+            "startDateTime": self._getSegDiff(config["oat"]["timedelta"]),
+            "endDateTime": self._getSegDiff(0),
+            "top": config["oat"]["top"],
+            "select": "YOUR_SELECT (string)",
+            "mode": "YOUR_MODE (string)",
+        }
+
+        headers = {"TMV1-Query": "YOUR_QUERY (string)"}
+
+        events = self._fetchTrendAPI(
+            "/v3.0/search/detections", query_params=query_params, headers=headers
+        )
+
+        if isinstance(events, dict):
+            print(json.dumps(events, indent=4))
+        else:
+            print(events)
+
     def getObservedAttackTechniques(self):
         try:
-            console.debug("Comenzando la obtención de Observed Attack Techniques events...")
+            console.debug(
+                "Comenzando la obtención de Observed Attack Techniques events..."
+            )
 
             query_params = {
-                "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(seconds=config["oat"]["timedelta"])).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "detectedEndDateTime": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "detectedStartDateTime": self._getSegDiff(config["oat"]["timedelta"]),
+                "detectedEndDateTime": self._getSegDiff(0),
                 "top": config["oat"]["top"],
             }
 
             headers = {
-                "TMV1-Filter": "(riskLevel eq 'low') or (riskLevel eq 'medium') or (riskLevel eq 'high') or (riskLevel eq 'critical')", # Filtros
+                "TMV1-Filter": "(riskLevel eq 'low') or (riskLevel eq 'medium') or (riskLevel eq 'high') or (riskLevel eq 'critical')",  # Filtros
             }
 
-            events = self.fetchTrendAPI("/v3.0/oat/detections", query_params=query_params, headers=headers)
+            events = self._fetchTrendAPI(
+                "/v3.0/oat/detections", query_params=query_params, headers=headers
+            )
             logs = parseOATEvents(events)
 
             console.debug("Saving OAT detections...")
             for log in logs:
                 self.logger.oat(log)
-            
+
             console.debug("Tarea completada.")
         except Exception as e:
             console.error(e)
 
-    def fetchTrendAPI(self, url_path: str, query_params: dict = {}, headers: dict = {}):
+    def _fetchTrendAPI(self, url_path: str, query_params: dict = {}, headers: dict = {}):
         try:
             url_base = "https://" + getRegion(config["api"]["region"])
             url_path = "/v3.0/oat/detections"
@@ -60,7 +88,9 @@ class TrendVisionOne:
                 console.debug(f"{k}: {v}")
             console.debug("")
 
-            if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
+            if "application/json" in r.headers.get("Content-Type", "") and len(
+                r.content
+            ):
                 return r.json()
             else:
                 return r.text
@@ -68,3 +98,10 @@ class TrendVisionOne:
             console.error("Timeout error:", e)
         except Exception as e:
             console.error(e)
+
+    def _getSegDiff(self, seconds: int):
+        return datetime.now(tz=timezone.utc) - timedelta(seconds=seconds).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    #  datetime.now(tz=timezone.utc)
+    #                 - timedelta(seconds=)
+    #             ).strftime("%Y-%m-%dT%H:%M:%SZ")
