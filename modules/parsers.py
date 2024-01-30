@@ -49,10 +49,7 @@ def parse_OAT(output):
             }
 
             selected_elements, other_elements = process_object(data, selected_keys)
-            log = "".join(selected_elements + other_elements)
-            # Remove any \n before push in array
-            
-            OATs.append()
+            OATs.append("".join(selected_elements + other_elements).replace("\n", ""))
         else:
             data = convert_object(item)
             selected_keys = {
