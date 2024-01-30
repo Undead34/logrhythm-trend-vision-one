@@ -8,22 +8,31 @@ def send_email(message: str, subject: str = "Trend Vision One - Error Report"):
     context = ssl.create_default_context()
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        username = config["email"]["email"]
-        password = config["email"]["password"]
-        report = config["email"]["report"]
-        alternative_report = config["email"]["alternative_report"]
+        smtp_config = config.get("smtp", None)
+
+        if not smtp_config:
+            server.quit()
+            return
+
+        username: str | None = smtp_config.get("username", None)
+        password: str | None = smtp_config.get("password", None)
+        recipient: str | None = smtp_config.get("report_to", None)
+
+        if not username or not password or not recipient:
+            server.quit()
+            return
 
         mime = MIMEMultipart("alternative")
         mime["Subject"] = subject
         mime["From"] = f"Trend Vision One <{username}>"
-        mime["To"] = f"{report}, {alternative_report}"
+        mime["To"] = recipient
 
         text = MIMEText(message, "plain")
         mime.attach(text)
 
         try:
             server.login(username, password)
-            server.sendmail(username, [report, alternative_report], mime.as_string())
+            server.sendmail(username, recipient.split(","), mime.as_string())
         except smtplib.SMTPAuthenticationError:
             print("No se ha podido iniciar sesión en el servidor de correo.")
             print("Por favor, compruebe que el nombre de usuario y la contraseña son correctos.")

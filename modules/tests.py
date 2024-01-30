@@ -27,8 +27,6 @@ def _network_test():
             message += json.dumps(r.json(), indent=4)
         else:
             message += r.text
-        
-        # print(message)
 
         if r.status_code == 401:
             raise NetworkError(
@@ -49,11 +47,13 @@ def _network_test():
         raise e
     except Exception as e:
         raise NetworkError("No se ha podido establecer conexión con Trend Vision One.\nPor favor, compruebe su conexión a Internet.")
+    
     return False
 
 def _paths_test():
     try:
         console.debug("Comprobando directorios necesarios para el funcionamiento de Trend Vision One...")
+        
         for key, value in paths.items():
             if not os.path.exists(value):
                 raise FileSystemError(f"El directorio {key} no existe.")
@@ -65,6 +65,7 @@ def _paths_test():
         raise e
     except Exception as e:
         raise FileSystemError("No se han podido crear los directorios necesarios para el funcionamiento de Trend Vision One.")
+    
     return True
 
 def test():
@@ -73,11 +74,10 @@ def test():
         _paths_test()
         return True
     except NetworkError as e:
-        console.debug("NetworkError in test function")
+        console.error(f"NetworkError in test function: {e.message}")
         e.report()
     except FileSystemError as e:
-        console.debug("FileSystemError in test function")
-        e.report()
+        console.error(f"FileSystemError in test function: {e.message}")
     except Exception as e:
         console.error(e.message)
     

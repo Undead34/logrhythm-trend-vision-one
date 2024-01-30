@@ -19,11 +19,10 @@ config = {
         "expiration": os.environ.get("EXPIRATION_DATE_TOKEN"),
         "region": os.environ.get("REGION"),
     },
-    "email": {
-        "report": os.environ.get("EMAIL_REPORT"),
-        "alternative_report": os.environ.get("ALTERNATIVE_EMAIL_REPORT"),
+    "smtp": {
         "email": os.environ.get("EMAIL"),
         "password": os.environ.get("EMAIL_PASSWORD"),
+        "report_to": os.environ.get("EMAIL_REPORT"),
     },
     "logger": {
         "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE")) or sizeTextToNum("8MB"),

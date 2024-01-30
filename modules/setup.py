@@ -6,13 +6,17 @@ from .loggers import console
 
 def isfirstStart():
     firstStart = False
-    
-    firstStart |= not path.exists(paths["logs"])
-    firstStart |= not path.exists(paths["oat"])
+
+    for key, value in paths.items():
+        if not path.exists(value):
+            firstStart = True
+            break
 
     return firstStart
 
 def setup():
     console.debug("Configurando Trend Vision One...")
-    os.makedirs(paths["logs"], exist_ok=True)
-    os.makedirs(paths["oat"], exist_ok=True)
+    
+    for key, value in paths.items():
+        os.makedirs(value, exist_ok=True)
+        console.debug(f"Directorio {key} creado en {value}")

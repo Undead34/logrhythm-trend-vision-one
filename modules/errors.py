@@ -9,7 +9,6 @@ class NetworkError(Exception):
     def report(self):
         send_email(f"Event Date: {getISO8601Time()}\n{self.message}")
 
-
 class FileSystemError(Exception):
     def __init__(self, message):
         self.message = message

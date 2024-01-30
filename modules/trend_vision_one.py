@@ -16,6 +16,7 @@ class TrendVisionOne:
     def __init__(self):
         self.logger = TrendMicroLogger()
         self.getObservedAttackTechniques()
+        # self.getDetectionData()
 
     def getDetectionData(self):
         console.debug("Comenzando la obtención de Detection Data events...")
@@ -24,8 +25,8 @@ class TrendVisionOne:
             "startDateTime": self._getSegDiff(config["oat"]["timedelta"]),
             "endDateTime": self._getSegDiff(0),
             "top": config["oat"]["top"],
-            "select": "YOUR_SELECT (string)",
-            "mode": "YOUR_MODE (string)",
+            "select": "empty",
+            "mode": "default",
         }
 
         headers = {"TMV1-Query": "YOUR_QUERY (string)"}
