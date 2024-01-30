@@ -1,34 +1,16 @@
-import requests
-import json
 import os
 
-from .constants import config, paths
+from .constants import paths
 from .loggers import console
+from .trend_vision_one import TrendVisionOne
 from .errors import NetworkError, FileSystemError
 
 def _network_test():
     try:
         console.debug("Comprobando conexión con Trend Vision One...")
-        url_base = "https://api.xdr.trendmicro.com"
-        url_path = "/v3.0/healthcheck/connectivity"
-        token = config["api"]["token"]
-
-        query_params = {}
-        headers = {"Authorization": "Bearer " + token}
-
-        r = requests.get(url_base + url_path, params=query_params, headers=headers)
-        message = ""
-        message += f"Status Code: {r.status_code}\n"
-
-        for k, v in r.headers.items():
-            message += f"{k}: {v}\n"
+        status_code, message = TrendVisionOne.checkAPIStatus()
         
-        if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
-            message += json.dumps(r.json(), indent=4)
-        else:
-            message += r.text
-
-        if r.status_code == 401:
+        if status_code == 401:
             raise NetworkError(
                 "[URGENTE]!!! El token de Trend Vision One ha expirado o no es válido.\n"
                 "Por favor, actualice el token en el archivo de configuración. (.env)\n"
@@ -39,9 +21,10 @@ def _network_test():
                 "DETALLES:\n"
                 f"{message}"
             )
-        elif r.status_code != 200:
+        elif status_code != 200:
             print(message)
         else:
+            console.debug("Conexión con Trend Vision One establecida.")
             return True
     except NetworkError as e:
         raise e

@@ -15,25 +15,25 @@ from .utils import getRegion
 class TrendVisionOne:
     def __init__(self):
         self.logger = TrendMicroLogger()
-        self.getObservedAttackTechniques()
-        # self.getDetectionData()
+        # self.getObservedAttackTechniques()
+        self.getDetectionData()
 
     def getDetectionData(self):
         console.debug("Comenzando la obtención de Detection Data events...")
 
         query_params = {
-            "startDateTime": self._getSegDiff(config["oat"]["timedelta"]),
-            "endDateTime": self._getSegDiff(0),
-            "top": config["oat"]["top"],
+            "startDateTime": "2023-04-05T08:22:37Z",
+            "endDateTime": "2023-04-06T08:22:37Z",
+            "top": 500,
             "select": "empty",
             "mode": "default",
         }
 
-        headers = {"TMV1-Query": "YOUR_QUERY (string)"}
+        headers = {
+            # "TMV1-Query": "YOUR_QUERY (string)"
+        }
 
-        events = self._fetchTrendAPI(
-            "/v3.0/search/detections", query_params=query_params, headers=headers
-        )
+        events = self._fetchTrendAPI("/v3.0/search/detections", query_params=query_params, headers=headers)
 
         if isinstance(events, dict):
             print(json.dumps(events, indent=4))
@@ -68,6 +68,30 @@ class TrendVisionOne:
             console.debug("Tarea completada.")
         except Exception as e:
             console.error(e)
+
+     
+    @staticmethod
+    def checkAPIStatus() -> bool:
+        url_base = "https://" + getRegion(config["api"]["region"])
+        url_path = "/v3.0/healthcheck/connectivity"
+        token = config["api"]["token"]
+
+        query_params = {}
+        headers = {"Authorization": "Bearer " + token}
+
+        r = requests.get(url_base + url_path, params=query_params, headers=headers)
+        message = ""
+        message += f"Status Code: {r.status_code}\n"
+
+        for k, v in r.headers.items():
+            message += f"{k}: {v}\n"
+        
+        if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
+            message += json.dumps(r.json(), indent=4)
+        else:
+            message += r.text
+
+        return r.status_code, message
 
     def _fetchTrendAPI(self, url_path: str, query_params: dict = {}, headers: dict = {}):
         try:
