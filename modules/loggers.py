@@ -14,7 +14,11 @@ class TrendMicroLogger():
         try:
             self.oat_logger.info(message)
         except Exception as e:
-            print(e)
+            import json
+            try:
+                print(json.dumps(message, indent=4))
+            except Exception as e:
+                 print(e)
 
     def configure_logger(self, logger: logging.Logger, log_file: str, max_size: int, max_files: int):
         logger.setLevel(logging.DEBUG)

@@ -49,6 +49,7 @@ def parse_OAT(output):
             }
 
             selected_elements, other_elements = process_object(data, selected_keys)
+
             OATs.append("".join(selected_elements + other_elements).replace("\n", ""))
         else:
             data = convert_object(item)
@@ -91,7 +92,7 @@ def parse_OAT(output):
     print("Número de OATs: " + str(output["count"]))
     print("Número de OATs válidos: " + str(len(OATs)))
     print("Número de OATs inválidos: " + str(output["count"] - len(OATs)))
-    return OATs
+    return []
 
 def process_object(data, selected_keys):
     selected_elements = []
@@ -99,6 +100,15 @@ def process_object(data, selected_keys):
 
     for item in data:
         for key, value in item.items():
+
+            if (key == "OBJECTRAWDATASTR"):
+                import string
+                print(key)
+                print(type(value))
+                print(value)
+                continue
+
+
             if key in selected_keys:
                 selected_elements.append(f"{key.upper()}: {value}")
             else:
@@ -125,14 +135,14 @@ def convert_object(data):
                         data[key] = data[key].encode()
                     data[key] = binascii.b2a_base64(data[key])
                 
-                converted_data.append({f"{key}": str(data[key])})
+                converted_data.append({f"{key.upper()}": str(data[key])})
 
     # Procesa los "filters" al final, ordenando sus claves también
     if "filters" in data:
         for filter_data in data["filters"]:
             for key in sorted(filter_data.keys()):
                 converted_data.append(
-                    {f"{key}": str(filter_data[key])}
+                    {f"{key.upper()}": str(filter_data[key])}
                 )  # Aquí estaba el error
 
     return converted_data
