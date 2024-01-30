@@ -49,7 +49,10 @@ def parse_OAT(output):
             }
 
             selected_elements, other_elements = process_object(data, selected_keys)
-            OATs.append("".join(selected_elements + other_elements))
+            log = "".join(selected_elements + other_elements)
+            # Remove any \n before push in array
+            
+            OATs.append()
         else:
             data = convert_object(item)
             selected_keys = {
@@ -91,7 +94,6 @@ def parse_OAT(output):
     print("Número de OATs válidos: " + str(len(OATs)))
     print("Número de OATs inválidos: " + str(output["count"] - len(OATs)))
     return OATs
-
 
 def process_object(data, selected_keys):
     selected_elements = []

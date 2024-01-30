@@ -23,8 +23,11 @@ class TrendVisionOne:
             query_params = {
                 "detectedStartDateTime": (datetime.now(tz=timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "detectedEndDateTime": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "top": 100,
+                "top": 200
+                ,
             }
+
+            # RAWDATASTR
 
             headers = {
                 "Authorization": "Bearer " + token,
