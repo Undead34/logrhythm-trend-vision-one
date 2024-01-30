@@ -102,10 +102,14 @@ def process_object(data, selected_keys):
         for key, value in item.items():
 
             if (key == "OBJECTRAWDATASTR"):
-                import string
-                print(key)
-                print(type(value))
-                print(value)
+                # Chesk if value contains a only valid ASCII characters
+                try:
+                    value: bytes = value.encode()
+                    print(f"Is ASCII: {value.isascii()} -  {value}")
+
+                    print(value)
+                except Exception as e:
+                    print("Error en la conversión de OBJECTRAWDATASTR")
                 continue
 
 
