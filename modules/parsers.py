@@ -85,7 +85,8 @@ def parse_OAT(output):
                 "highlightedObjects",
             }
             selected_elements, other_elements = process_object(data, selected_keys)
-            OATs.append("".join(selected_elements + other_elements))
+            OATs.append("".join(selected_elements + other_elements).replace("\n", ""))
+            
 
     print("Número de OATs: " + str(output["count"]))
     print("Número de OATs válidos: " + str(len(OATs)))
