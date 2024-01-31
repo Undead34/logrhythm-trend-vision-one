@@ -1,10 +1,9 @@
-from datetime import datetime, timezone, timedelta
 import requests, json
 
 from .loggers import TrendMicroLogger, console
 from .constants import config
 from .parsers import parseOATEvents
-from .utils import getRegion
+from .utils import get_region, get_deltatime
 
 """
     Clase que se encarga de obtener los eventos arronjados por Trend Vision One
@@ -15,64 +14,100 @@ from .utils import getRegion
 class TrendVisionOne:
     def __init__(self):
         self.logger = TrendMicroLogger()
-        # self.getObservedAttackTechniques()
-        self.getDetectionData()
+        self.url_base = "https://" + get_region(config["api"]["region"])
+        self.token = config["api"]["token"]
 
-    def getDetectionData(self):
-        console.debug("Comenzando la obtención de Detection Data events...")
+        # Get events
+        oat_start = get_deltatime(config["oat"]["timedelta"])
+        oat_end = get_deltatime(0)
+        oat_top = config["oat"]["top"]
+        self.get_oat(oat_start, oat_end, oat_top)
 
-        query_params = {
-            "startDateTime": "2023-04-05T08:22:37Z",
-            "endDateTime": "2023-04-06T08:22:37Z",
-            "top": 500,
-            "select": "empty",
-            "mode": "default",
-        }
+        # self.get_detection()
+        # self.get_audit_logs()
+
+    def get_oat(self, start, end, top):
+        console.debug("Obteniendo logs de Observed Attack Techniques events...")
+
+        params = {}
+        if start is not None:
+            params["detectedStartDateTime"] = start
+        if end is not None:
+            params["detectedEndDateTime"] = end
+        if top is not None:
+            params["top"] = top
 
         headers = {
-            # "TMV1-Query": "YOUR_QUERY (string)"
+            "TMV1-Filter": "(riskLevel eq 'low') or (riskLevel eq 'medium') or (riskLevel eq 'high') or (riskLevel eq 'critical')"
         }
 
-        events = self._fetchTrendAPI("/v3.0/search/detections", query_params=query_params, headers=headers)
+        oat = self.get_items("/v3.0/oat/detections", params=params, headers=headers)
+        console.debug("Saving OAT detections...")
+        logs = parseOATEvents(oat)
+        for log in logs:
+            self.logger.oat(log)
 
-        if isinstance(events, dict):
-            print(json.dumps(events, indent=4))
+    def get_items(self, url_path, params=None, headers=None):
+        items = []
+        next_link = None
+        totalCount = 0
+        count = 0
+
+        while True:
+            if next_link is None:
+                r = self.fetch(url_path, query_params=params, headers=headers)
+            else:
+                r = self.fetch(next_link, query_params=None, headers=headers)
+
+            items.extend(r["items"])
+
+            if "totalCount" in r:
+                totalCount = r["totalCount"]
+            
+            if "count" in r:
+                count += r["count"]
+
+            if "nextLink" not in r:
+                break
+
+            next_link = r["nextLink"]
+
+        return {
+            "totalCount": totalCount,
+            "count": count,
+            "items": items
+        }
+
+    def fetch(self, url_or_path, query_params=None, headers=None, use_token=True):
+        if query_params is None:
+            query_params = {}
+        if headers is None:
+            headers = {}
+
+        if use_token:
+            headers["Authorization"] = "Bearer " + self.token
+
+        url_path = None
+
+        if url_or_path.startswith("/"):
+            url_path = self.url_base + url_or_path
         else:
-            print(events)
+            url_path = url_or_path
 
-    def getObservedAttackTechniques(self):
-        try:
-            console.debug(
-                "Comenzando la obtención de Observed Attack Techniques events..."
-            )
+        r = requests.get(url_path, params=query_params, headers=headers)
 
-            query_params = {
-                "detectedStartDateTime": self._getSegDiff(config["oat"]["timedelta"]),
-                "detectedEndDateTime": self._getSegDiff(0),
-                "top": config["oat"]["top"],
-            }
+        if 200 == r.status_code:
+            if "application/json" in r.headers.get("Content-Type", ""):
+                return r.json()
+            return r.content
 
-            headers = {
-                "TMV1-Filter": "(riskLevel eq 'low') or (riskLevel eq 'medium') or (riskLevel eq 'high') or (riskLevel eq 'critical')",  # Filtros
-            }
+        raise RuntimeError(
+            f"Request unsuccessful (GET {url_path}):" f" {r.status_code} {r.text}"
+        )
 
-            events = self._fetchTrendAPI(
-                "/v3.0/oat/detections", query_params=query_params, headers=headers
-            )
-            logs = parseOATEvents(events)
-
-            console.debug("Saving OAT detections...")
-            for log in logs:
-                self.logger.oat(log)
-
-            console.debug("Tarea completada.")
-        except Exception as e:
-            console.error(e)
-
-     
     @staticmethod
     def checkAPIStatus() -> bool:
-        url_base = "https://" + getRegion(config["api"]["region"])
+        url_base = "https://" + get_region(config["api"]["region"])
         url_path = "/v3.0/healthcheck/connectivity"
         token = config["api"]["token"]
 
@@ -85,45 +120,10 @@ class TrendVisionOne:
 
         for k, v in r.headers.items():
             message += f"{k}: {v}\n"
-        
+
         if "application/json" in r.headers.get("Content-Type", "") and len(r.content):
             message += json.dumps(r.json(), indent=4)
         else:
             message += r.text
 
         return r.status_code, message
-
-    def _fetchTrendAPI(self, url_path: str, query_params: dict = {}, headers: dict = {}):
-        try:
-            url_base = "https://" + getRegion(config["api"]["region"])
-            url_path = "/v3.0/oat/detections"
-            token = config["api"]["token"]
-
-            headers = {
-                "Authorization": "Bearer " + token,
-            }
-
-            headers.update(headers)
-
-            r = requests.get(url_base + url_path, params=query_params, headers=headers)
-
-            console.debug(r.status_code)
-
-            for k, v in r.headers.items():
-                console.debug(f"{k}: {v}")
-            console.debug("")
-
-            if "application/json" in r.headers.get("Content-Type", "") and len(
-                r.content
-            ):
-                return r.json()
-            else:
-                return r.text
-        except requests.Timeout as e:
-            console.error("Timeout error:", e)
-        except Exception as e:
-            console.error(e)
-
-    def _getSegDiff(self, seconds: int):
-        diff: datetime = datetime.now(tz=timezone.utc) - timedelta(seconds=seconds)
-        return diff.strftime("%Y-%m-%dT%H:%M:%SZ")

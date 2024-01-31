@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
 
 def sizeTextToNum(size: str):
     """Converts a size string to a number of bytes
@@ -24,7 +25,7 @@ def getISO8601Time():
     return datetime.now().isoformat()
 
 # return URL for region by region code e.g "US" -> "api.xdr.trendmicro.com"
-def getRegion(code: str):
+def get_region(code: str):
     if code == "AU":
         return "api.au.xdr.trendmicro.com"
     elif code == "EU":
@@ -56,3 +57,18 @@ def getTokenDays(expiration: str) -> int:
         return (expiration - today).days
     except:
         return 0
+
+def _is_aware_datetime(d: datetime):
+    return (d.tzinfo is not None) and (d.tzinfo.utcoffset(d) is not None)
+
+# return datetime in ISO8601 format
+def _get_datetime_param(d: datetime):
+    if not _is_aware_datetime(d):
+        d = d.astimezone()
+    d = d.astimezone(timezone.utc)
+    d = d.isoformat(timespec="seconds").replace('+00:00', 'Z')
+    return d
+
+def get_deltatime(seconds: int):
+    d = datetime.now(tz=timezone.utc) - timedelta(seconds=seconds)
+    return  _get_datetime_param(d)

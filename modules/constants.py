@@ -13,25 +13,26 @@ if not os.path.exists(".env"):
 # Load .env file and override if already exists
 load_dotenv(override=True)
 
+# Environment variables
 config = {
     "api": {
-        "token": os.environ.get("API_TOKEN"),
-        "expiration": os.environ.get("EXPIRATION_DATE_TOKEN"),
-        "region": os.environ.get("REGION"),
+        "token": os.environ.get("API_TOKEN", None),
+        "expiration": os.environ.get("EXPIRATION_DATE_TOKEN", ""),
+        "region": os.environ.get("REGION", "US"),
     },
     "smtp": {
-        "email": os.environ.get("EMAIL"),
-        "password": os.environ.get("EMAIL_PASSWORD"),
-        "report_to": os.environ.get("EMAIL_REPORT"),
+        "email": os.environ.get("EMAIL", None),
+        "password": os.environ.get("EMAIL_PASSWORD", None),
+        "report_to": os.environ.get("EMAIL_REPORT", None),
     },
     "logger": {
-        "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE")) or sizeTextToNum("8MB"),
-        "max_files": int(os.environ.get("MAX_NUM_FILES")) or 50,
+        "max_size": sizeTextToNum(os.environ.get("MAX_FILE_SIZE", "8MB")),
+        "max_files": int(os.environ.get("MAX_NUM_FILES", 50)),
     },
-    "log_source_id": os.environ.get("LOG_SOURCE_ID"),
+    "log_source_id": os.environ.get("LOG_SOURCE_ID", "0"),
     "oat": {
-        "timedelta": int(os.environ.get("OAT_TIMEDELTA")) or 300,
-        "top": int(os.environ.get("OAT_TOP")) or 50,
+        "timedelta": int(os.environ.get("OAT_TIMEDELTA", 300)),
+        "top": int(os.environ.get("OAT_TOP", 50)),
     },
 }
 
