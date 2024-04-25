@@ -33,7 +33,7 @@ def bootstrap():
     w.write(data.get("workbench"), stream="workbench")
     w.write(data.get("OAT"), stream="OAT")
     w.write(data.get("audit_logs"), stream="audit_logs")
-    # w.write(data.get("detections"), stream="detections")
+    w.write(data.get("detections"), stream="detections")
 
 
 # Main function
