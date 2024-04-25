@@ -1,22 +1,11 @@
-from os import path
 import os
 
-from .constants import paths
-from .loggers import console
+from utils.constants import paths
 
-def isfirstStart():
-    firstStart = False
-
-    for key, value in paths.items():
-        if not path.exists(value):
-            firstStart = True
-            break
-
-    return firstStart
 
 def setup():
-    console.debug("Configurando Trend Vision One...")
-    
-    for key, value in paths.items():
+    print("It is the first start, creating directories")
+
+    for _, value in paths.items():
         os.makedirs(value, exist_ok=True)
-        console.debug(f"Directorio {key} creado en {value}")
+        print(f"The {value} directory has been created")
